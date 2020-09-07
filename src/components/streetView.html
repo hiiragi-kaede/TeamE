@@ -240,14 +240,64 @@
     var contentData;
     var contentTempData;
     var contentRef = database.ref('content/');
+
+    //Ryota Watanabe 2020/09/07
+    //常に実行される。DBが更新されたときに呼び出される(更新処理に使う)
     contentRef.on('value', function(snapshot) {
+
+        deleteMarkers();
         contentData = snapshot.val()
+        SetMarkersFromDB();
     })
 
     contentRef.once('value').then(function(snapshot) {
         contentTempData = snapshot.val()
     })
-    console.log(contentData);
+
+
+    function SetMarkersFromDB(){
+      var contentString = '<div id="content">'+
+      '<h1 id="firstHeading" class="firstHeading">Uluru</h1>'+
+      '<div id="bodyContent">'
+      '<p>Attribution: Uluru, <a href="https://en.wikipedia.org/w/index.php?title=Uluru&oldid=297882194">'+
+      'https://en.wikipedia.org/w/index.php?title=Uluru</a> '+
+      '(last visited June 22, 2009).</p>'+
+      '</div>'+
+      '</div>';;
+
+      var infowindow = new google.maps.InfoWindow({
+        content: contentString
+      });
+
+      console.log(contentData);
+      Object.keys(contentData).forEach(function(key){
+        const newMarker = new google.maps.Marker({
+        position: {
+          lat: contentData[key]["lat"],
+          lng: contentData[key]["lng"]
+        },
+        map,
+        icon:
+          "../img/tokyo_2021.png",
+        title: contentData[key]["title"],
+        url:contentData[key]["url"]
+        });
+        markers.push(newMarker);
+      });
+      
+
+      //Meisho Kanaomi
+      for(let i=0; i<markers.length; i++){
+          //console.log(markers[i]);
+          // google.maps.event.addListener(markers[i], 'click', (function(url){
+          // return window.open(markers[i].url);}))
+
+          markers[i].addListener('click',function(){
+            infowindow.open(map,markers[i]);
+            console.log("open info_window");
+          });
+      }
+    }
 
     
 </script>
